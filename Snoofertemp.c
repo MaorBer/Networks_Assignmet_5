@@ -8,25 +8,19 @@
 #include <net/ethernet.h>
 #include <pcap.h>
 
-void got_packet(u_char *, const struct pcap_pkthdr *, const u_char *);
-FILE *file = NULL;
 
-struct applicationheader {
-    uint32_t unix_time;
-    uint16_t tot_len;
-    uint16_t flags;
-    uint16_t cache_c;
-    uint16_t padding;
-};
+void spoof_icmp();
+void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
 
 int main()
 {
-    file = fopen("212305965.txt","a");
+
+    file = fopen("212305965_213358039.txt","a");
 
     pcap_t *handle;
     char errbuf[PCAP_ERRBUF_SIZE];
     struct bpf_program fp;
-    char filter_exp[] = "tcp";
+    char filter_exp[] = "icmp";
     bpf_u_int32 net = 0;
 
     handle = pcap_open_live("enp7s0", 5000, 1, 1000, errbuf);
@@ -41,6 +35,23 @@ int main()
     fclose(file);
 
     return 0;
+
+    /*
+        TODO: sniffer with filter for icmp
+    */
+
+
+
+}
+
+void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
+{
+   
+   
+   
+    /*
+        TODO: send spoofed icmp
+    */
 }
 
 void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
@@ -68,4 +79,37 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
         fprintf(file, "}\n");
         fflush(file);
     }
+
+void spoof_icmp()
+{
+    char buffer[1500];
+    memset(buffer, 0, 1500);
+    /*********************************************************
+       Step 1: Fill in the ICMP header.
+     ********************************************************/
+    struct icmpheader *icmp = (struct icmpheader *)(buffer + sizeof(struct ipheader));
+    icmp->icmp_type = 8; // ICMP Type: 8 is request, 0 is reply.
+
+    // Calculate the checksum for integrity
+    icmp->icmp_chksum = 0;
+    icmp->icmp_chksum = in_cksum((unsigned short *)icmp,
+                                 sizeof(struct icmpheader));
+
+    /*********************************************************
+       Step 2: Fill in the IP header.
+     ********************************************************/
+    struct ipheader *ip = (struct ipheader *)buffer;
+    ip->iph_ver = 4;
+    ip->iph_ihl = 5;
+    ip->iph_ttl = 20;
+    ip->iph_sourceip.s_addr = inet_addr("6.6.6.6");
+    ip->iph_destip.s_addr = inet_addr("5.5.5.5");
+    ip->iph_protocol = IPPROTO_ICMP;
+    ip->iph_len = htons(sizeof(struct ipheader) +
+                        sizeof(struct icmpheader));
+
+    /*********************************************************
+       Step 3: Finally, send the spoofed packet
+     ********************************************************/
+    send_raw_ip_packet(ip);
 }

@@ -1,15 +1,15 @@
-.PHONY = clean 
+.PHONY = clean all
 
 
 all: Sniffer Spoofer Snoofer
 
 Sniffer: Sniffer.c
-	gcc -Wall Sniffer.c -o Sniffer  -lpcap
+	gcc -Wall -g Sniffer.c -o Sniffer  -lpcap
 Spoofer: Spoofer.c
-	gcc -Wall Spoofer.c -o Spoofer 
+	gcc -Wall -g Spoofer.c -o Spoofer 
 
-# Snoofer: Snoofer.c
-# 	gcc Snoofer.c -o Snoofer -Wall -lpcap
+Snoofer: Snoofer.c
+	gcc -Wall -g Snoofer.c -o Snoofer  -lpcap
 
 clean:
 	rm -f *.o Sniffer Spoofer Snoofer
