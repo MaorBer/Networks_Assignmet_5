@@ -1,15 +1,19 @@
 .PHONY = clean all
 
+CC = gcc
+FLAGS = -Wall -g 
 
-all: Sniffer Spoofer Snoofer
+all: Sniffer Spoofer Snoofer Gateway
 
 Sniffer: Sniffer.c
-	gcc -Wall -g Sniffer.c -o Sniffer  -lpcap
+	$(CC) $(FLAGS) Sniffer.c -o Sniffer  -lpcap
 Spoofer: Spoofer.c
-	gcc -Wall -g Spoofer.c -o Spoofer 
+	$(CC) $(FLAGS) Spoofer.c -o Spoofer 
 
 Snoofer: Snoofer.c
-	gcc -Wall -g Snoofer.c -o Snoofer  -lpcap
+	$(CC) $(FLAGS) Snoofer.c -o Snoofer  -lpcap
 
+Gateway: Gateway.c	
+	$(CC) $(FLAGS) Gateway.c -o Gateway -lpcap
 clean:
 	rm -f *.o Sniffer Spoofer Snoofer

@@ -8,62 +8,62 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#define PORT 9998
-#define PORT1 9999
+#define PORT 9696
+#define PORT1 9979
 #define BUFFER_SIZE 1024
 
 int main(int argc, char **argv) {
 
     //get the ip to ping from the user
-    char *destantion_ip=argv[1];
+    char *destIP=argv[1];
     
     // Create socket
-    int socket_port = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (socket_port == -1) {
+    int sockA = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sockA == -1) {
         printf("Could not create socket : %d\n", errno);
-        close(socket_port);
+        close(sockA);
         return -1;
     }
-    printf("socket_port created successfully!\n");
+    printf("sockA created successfully!\n");
 
-    // setup Server address structure with port 9998
-    struct sockaddr_in serverAddress;
-    memset((char *)&serverAddress, 0, sizeof(serverAddress));
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(PORT); // using port 9998
-    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+    // setup Server address structure with port 9696
+    struct sockaddr_in serverSide;
+    memset((char *)&serverSide, 0, sizeof(serverSide));
+    serverSide.sin_family = AF_INET;
+    serverSide.sin_port = htons(PORT); // using port 9696
+    serverSide.sin_addr.s_addr = htonl(INADDR_ANY);
     
-    // create another socket to send with port 9999
-    int socket_port_plus1 = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (socket_port_plus1 == -1) {
+    // create another socket to send with port 9979
+    int sockB = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sockB == -1) {
         printf("Could not create socket : %d\n", errno);
-        close(socket_port);
-        close(socket_port_plus1);
+        close(sockA);
+        close(sockB);
         return -1;
     }
-    printf("socket_port_plus1 created successfully!\n");
+    printf("sockB created successfully!\n");
 
-    // Initialize outgoing socket address with port 9999 - to send
+    // Initialize outgoing socket address with port 9979 - to send
     struct sockaddr_in socket_p1;
     memset(&socket_p1, 0, sizeof(socket_p1));
     socket_p1.sin_family = AF_INET;
     socket_p1.sin_port = htons(PORT1);
-    int adr=inet_pton(AF_INET,(const char*)destantion_ip ,&socket_p1.sin_addr);
+    int adr=inet_pton(AF_INET,(const char*)destIP ,&socket_p1.sin_addr);
     if (adr<=0) {
         perror("inet_aton");
-        close(socket_port);
-        close(socket_port_plus1);
+        close(sockA);
+        close(sockB);
         return -1;
     }
 
 
-    // Binding to socket_port
-    int binding = bind(socket_port, (struct sockaddr *)&serverAddress, sizeof(serverAddress));
+    // Binding to sock
+    int binding = bind(sockA, (struct sockaddr *)&serverSide, sizeof(serverSide));
     if (binding == -1) {
         printf("bind() failed with error code : %d\n", errno);
         // cleanup the socket;
-        close(socket_port);
-        close(socket_port_plus1);
+        close(sockA);
+        close(sockB);
         return -1;
     }
     printf("After bind(). Waiting for clients\n");
@@ -88,12 +88,12 @@ int main(int argc, char **argv) {
         memset(buffer, '\0', sizeof(buffer));
 
         // try to receive some data, this is a blocking call
-        int CheckingReceive = recvfrom(socket_port, buffer, sizeof(buffer)-1, 0, (struct sockaddr *)&clientAddress, &clientAddressLen);
+        int CheckingReceive = recvfrom(sockA, buffer, sizeof(buffer)-1, 0, (struct sockaddr *)&clientAddress, &clientAddressLen);
         if (CheckingReceive == -1) {
             printf("recvfrom() failed with error code : %d", errno);
             // cleanup the socket;
-            close(socket_port);
-            close(socket_port_plus1);
+            close(sockA);
+            close(sockB);
             break;
         }
         printf("recived packet successfully!\n");
@@ -110,11 +110,11 @@ int main(int argc, char **argv) {
             float random_number=((float)random())/((float)RAND_MAX);
             if(random_number>0.5)
             {
-                int checking_send=sendto(socket_port_plus1,buffer,sizeof(buffer),0,(struct sockaddr*)&socket_p1,sizeof(socket_p1));
+                int checking_send=sendto(sockB,buffer,sizeof(buffer),0,(struct sockaddr*)&socket_p1,sizeof(socket_p1));
                 if(checking_send==-1){
                     printf("sendto() failed with error code : %d\n", errno);
-                    close(socket_port);
-                    close(socket_port_plus1);
+                    close(sockA);
+                    close(sockB);
                     break;
                 }
                 else{
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
     }
 
     //closing sockets
-    close(socket_port);
-    close(socket_port_plus1);
+    close(sockA);
+    close(sockB);
     return 0;
 }
