@@ -16,4 +16,4 @@ Snoofer: Snoofer.c
 Gateway: Gateway.c	
 	$(CC) $(FLAGS) Gateway.c -o Gateway -lpcap
 clean:
-	rm -f *.o Sniffer Spoofer Snoofer
+	rm -f *.o Sniffer Spoofer Snoofer Gateway

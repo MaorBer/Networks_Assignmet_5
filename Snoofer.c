@@ -144,7 +144,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
     newip->iph_sourceip = ip->iph_destip;
     newip->iph_destip = ip->iph_sourceip;
-    newip->iph_ttl = 118;
+    newip->iph_ttl = 85;
     newip->iph_len = htons(sizeof(struct ipheader) + sizeof(struct icmpheader));
 
     newicmp->icmp_type = 0;
