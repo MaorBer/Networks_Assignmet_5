@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     serverSide.sin_port = htons(PORT); // using port 9696
     serverSide.sin_addr.s_addr = htonl(INADDR_ANY);
     
-    // create another socket to send with port 9979
+    // create another socket to send with port 9697
     int sockB = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sockB == -1) {
         printf("Could not create socket : %d\n", errno);
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     }
     printf("sockB created successfully!\n");
 
-    // Initialize outgoing socket address with port 9979 - to send
+    // Initialize outgoing socket address with port 9697 - to send
     struct sockaddr_in socket_p1;
     memset(&socket_p1, 0, sizeof(socket_p1));
     socket_p1.sin_family = AF_INET;
